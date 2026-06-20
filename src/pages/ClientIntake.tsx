@@ -17,7 +17,7 @@ export default function ClientIntake() {
   useLeadTracker('intake_started');
 
   const [searchParams] = useSearchParams();
-  const [activeStep, setActiveStep] = useState<'welcome' | 'configure' | 'proposal' | 'deposit' | 'assets' | 'development' | 'launch'>('welcome');
+  const [activeStep, setActiveStep] = useState<'welcome' | 'configure' | 'proposal' | 'deposit' | 'assets' | 'development' | 'launch' | 'success'>('welcome');
   
   useEffect(() => {
     if (activeStep) {
@@ -70,11 +70,6 @@ export default function ClientIntake() {
   const [copiedBsb, setCopiedBsb] = useState(false);
   const [copiedAccountNumber, setCopiedAccountNumber] = useState(false);
 
-  // Chat Feedbacks
-  const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [isSendingChat, setIsSendingChat] = useState(false);
-
   // Load Privacy & Terms Modals
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
@@ -98,6 +93,9 @@ export default function ClientIntake() {
       timeline: '2–4 weeks',
       decision_status: 'Ready to start after final scope',
       notes: '',
+      current_online_presence: '',
+      target_audience: '',
+      reference_websites: '',
       // Asset parameters
       brand_colors_primary: '#0ea5e9',
       brand_colors_secondary: '#10b981',
@@ -177,29 +175,8 @@ export default function ClientIntake() {
       if (projectData.signature_name) {
         setSigneeName(projectData.signature_name);
       }
-
-      // Fetch feedbacks for this project
-      loadProjectFeedbacks(projectData.id);
     }
   }, [projectData]);
-
-  // Load feedback logs helper
-  const loadProjectFeedbacks = async (projectId: string) => {
-    if (!isFirebaseConfigured) {
-      const localFStr = localStorage.getItem('clarity_local_feedbacks') || '[]';
-      const localF = JSON.parse(localFStr).filter((f: any) => f.project_id === projectId);
-      setChatMessages(localF);
-      return;
-    }
-    try {
-      const feedbackQuery = query(collection(db, "feedbacks"), where("project_id", "==", projectId));
-      const fSnap = await getDocs(feedbackQuery);
-      const list = fSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setChatMessages(list.sort((a: any, b: any) => (a.created_at?.seconds || 0) - (b.created_at?.seconds || 0)));
-    } catch (e) {
-      console.warn("Could not retrieve online notes history", e);
-    }
-  };
 
   // Safe update project helper
   const handleUpdateProjectRemote = async (updates: any) => {
@@ -380,7 +357,7 @@ export default function ClientIntake() {
          }
          
          setProjectData((prev: any) => ({ ...prev, ...projectPayload }));
-         window.location.href = `/static-business-quote?id=${projectData.id}`;
+         setActiveStep('success');
       } else {
          // CREATE new document
          const initialProjectPayload = {
@@ -426,14 +403,14 @@ export default function ClientIntake() {
       if (projectData?.id) {
          updateLocalFallback(projectData.id, projectPayload);
          setProjectData((prev: any) => ({ ...prev, ...projectPayload }));
-         window.location.href = `/static-business-quote?id=${projectData.id}`;
+         setActiveStep('success');
       } else {
          const initialProjectPayload = { ...projectPayload, created_at: new Date().toISOString() };
          const docId = saveToLocalFallback('intakes', initialProjectPayload);
          setProjectData({ id: docId, collection: 'intakes', ...initialProjectPayload });
          localStorage.setItem('clarity_recent_project_token', generatedSecureToken);
          localStorage.setItem('clarity_recent_project_name', formData.business_name);
-         window.location.href = `/static-business-quote?id=${docId}`;
+         setActiveStep('success');
       }
     } finally {
       setSubmitting(false);
@@ -535,42 +512,6 @@ export default function ClientIntake() {
       console.warn(e);
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  // Post live feedback/chat notes during assembly or staging reviews
-  const handlePostChatFeedback = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim() || !projectData) return;
-
-    setIsSendingChat(true);
-    const newMsg = {
-      project_id: projectData.id,
-      contact_name: projectData.contact_name || 'Client',
-      business_name: projectData.business_name || 'Your Business',
-      feedback_text: chatInput.trim(),
-      feedback_type: 'Staging Revision Request',
-      created_at: isFirebaseConfigured ? serverTimestamp() : new Date().toISOString(),
-      submitted_at: new Date().toISOString()
-    };
-
-    try {
-      if (!isFirebaseConfigured) {
-        const localFStr = localStorage.getItem('clarity_local_feedbacks') || '[]';
-        const list = JSON.parse(localFStr);
-        const withId = { id: 'fb_' + Date.now(), ...newMsg };
-        list.push(withId);
-        localStorage.setItem('clarity_local_feedbacks', JSON.stringify(list));
-        setChatMessages(prev => [...prev, withId]);
-      } else {
-        const docRef = await withTimeout(addDoc(collection(db, "feedbacks"), newMsg), 4000);
-        setChatMessages(prev => [...prev, { id: docRef.id, ...newMsg }]);
-      }
-      setChatInput('');
-    } catch (err) {
-      console.warn("Storage delay. Note logged offline.", err);
-    } finally {
-      setIsSendingChat(false);
     }
   };
 
@@ -682,38 +623,37 @@ export default function ClientIntake() {
             </div>
           </div>
         )}
-
-        {/* =======================================================
+           {/* =======================================================
             PATH A: WELCOME / RETRIEVE PROJECT
             ======================================================= */}
         {activeStep === 'welcome' && (
-          <div className="py-12 space-y-8 animate-fadeIn mt-6">
+          <div className="py-12 space-y-8 animate-fadeIn mt-6 max-w-4xl mx-auto">
             
             <div className="text-center space-y-3">
               <span className="px-3 py-1 border border-cyan-800/40 bg-cyan-950/20 text-cyan-400 text-[10px] font-mono tracking-widest uppercase rounded-full">
-                Clarity Space Automated Workspace
+                Website Inquiry System
               </span>
-              <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tighter">
-                Redesigned Project Intake Center
+              <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight font-display">
+                Get a Custom Website Quote
               </h1>
-              <p className="text-slate-400 max-w-2xl mx-auto font-light text-sm sm:text-base leading-relaxed">
-                Configure your custom project parameters, sign agreements digitally, complete simulated booking deposits, and upload branding guidelines in one automated stream.
+              <p className="text-slate-400 max-w-xl mx-auto font-light text-sm sm:text-base leading-relaxed">
+                Tell us about your business, select a basic package, and we’ll review your details to provide a simplified website plan, price guidelines, and next steps quickly.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
               
-              {/* Box A1: Onboard New Project */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-6 hover:border-slate-700/80 transitionURL relative overflow-hidden group">
+              {/* Box A1: Start Website Request */}
+              <div className="bg-slate-900 border border-slate-805 rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-6 hover:border-slate-700/80 transition relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-all duration-350" />
                 <div className="space-y-4">
                   <div className="w-12 h-12 rounded-2xl bg-cyan-950/40 border border-cyan-800/30 flex items-center justify-center">
                     <Sparkles className="w-6 h-6 text-cyan-400 animate-pulse" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">1. KICKOFF NEW BUILD</h3>
+                  <div className="text-left">
+                    <h3 className="text-lg font-bold text-white uppercase tracking-tight">Start a Website Request</h3>
                     <p className="text-slate-400 text-xs mt-1.5 leading-relaxed font-light">
-                      Input your business outline, choose target pages, premium functional modules, and generate an immediate digital project contract agreement.
+                      Fill out our friendly 2-minute form to let us know what kind of website you need, your budget, and business details.
                     </p>
                   </div>
                 </div>
@@ -722,39 +662,39 @@ export default function ClientIntake() {
                   onClick={() => setActiveStep('configure')}
                   className="w-full py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md hover:shadow-cyan-500/25 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Configure Scope &amp; Quote <ChevronRight className="w-4 h-4" />
+                  Start Request Form <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Box A2: Resume Workspace */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-6 hover:border-slate-700/80 transition relative overflow-hidden">
+              {/* Box A2: Continue My Project */}
+              <div className="bg-slate-900 border border-slate-805 rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-6 hover:border-slate-700/80 transition relative overflow-hidden">
                 <div className="space-y-4">
                   <div className="w-12 h-12 rounded-2xl bg-indigo-950/45 border border-indigo-900/30 flex items-center justify-center">
                     <ShieldCheck className="w-6 h-6 text-indigo-400" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">2. RESUME INTAKE HUB</h3>
+                  <div className="text-left">
+                    <h3 className="text-lg font-bold text-white uppercase tracking-tight">Continue My Project</h3>
                     <p className="text-slate-400 text-xs mt-1.5 leading-relaxed font-light">
-                      Already initiated? Enter your secure client tracking token key to pick up exactly where you left off.
+                      Already filled out the form? Enter your secure tracking code below to check status, upload photos, or approve plans.
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 text-left">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono tracking-wider uppercase text-slate-500">Secure Token</label>
+                    <label className="text-[10px] font-mono tracking-wider uppercase text-slate-500">Secure Tracking Code</label>
                     <div className="flex gap-2">
                       <input 
                         type="text"
                         value={tokenInput}
                         onChange={(e) => setTokenInput(e.target.value)}
-                        placeholder="cl-g92j5b..."
+                        placeholder="e.g. cl-g92j5b..."
                         className="flex-1 bg-slate-950 border border-slate-800 focus:border-cyan-500 rounded-xl px-3 py-2.5 text-xs text-white font-mono outline-none"
                       />
                       <button
                         onClick={() => handleLoadProjectByToken(tokenInput)}
                         disabled={isLoadingProject}
-                        className="px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition disabled:opacity-50 cursor-pointer"
+                        className="px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition disabled:opacity-50 cursor-pointer text-center"
                       >
                         {isLoadingProject ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Load'}
                       </button>
@@ -772,16 +712,16 @@ export default function ClientIntake() {
                 <div className="flex items-center gap-2.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
                   <div className="text-left">
-                    <span className="block text-[10px] font-mono uppercase text-slate-500">Active Intake Cached</span>
+                    <span className="block text-[10px] font-mono uppercase text-slate-500">Active Inquiry Cached</span>
                     <span className="text-xs font-semibold text-white leading-normal truncate block max-w-[200px]">{recentName || 'Active Session'}</span>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleLoadProjectByToken(recentToken)}
-                  className="px-4 py-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 xs:text-xs text-[10px] uppercase font-mono font-bold rounded-xl hover:opacity-90 transition cursor-pointer shrink-0"
+                  className="px-4 py-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 xs:text-xs text-[10px] uppercase font-mono font-bold rounded-xl hover:opacity-90 transition cursor-pointer shrink-0 animate-pulse"
                 >
-                  Resume Board <ArrowRight className="w-3 h-3 inline ml-1" />
+                  Resume <ArrowRight className="w-3 h-3 inline ml-1" />
                 </button>
               </div>
             )}
@@ -792,26 +732,25 @@ export default function ClientIntake() {
             PATH B: CONFIGURE SCOPE & INTERACTIVE ESTIMATOR
             ======================================================= */}
         {activeStep === 'configure' && (
-          <div className="py-6 space-y-8 animate-fadeIn text-left">
+          <div className="py-6 space-y-8 animate-fadeIn text-left max-w-4xl mx-auto font-sans">
             <div>
               <button 
                 onClick={() => setActiveStep('welcome')}
                 className="inline-flex items-center gap-1.5 text-xs text-slate-550 hover:text-cyan-400 font-mono uppercase transition cursor-pointer"
               >
-                <ChevronLeft className="w-4 h-4" /> Cancel Onboarding
+                <ChevronLeft className="w-4 h-4" /> Go Back
               </button>
-              <h2 className="text-3xl font-black text-white mt-4 tracking-tight">Configure Scope &amp; Target Assets</h2>
-              <p className="text-slate-400 text-xs sm:text-sm font-light mt-1">Specify target variables; we instantly authorize custom pricing without admin delay.</p>
+              <h2 className="text-3xl font-black text-white mt-4 tracking-tight">Website Enquiry Form</h2>
+              <p className="text-slate-400 text-xs sm:text-sm font-light mt-1">
+                Tell us about your business and website needs. We’ll review your details and send back a simple website plan, price and next steps.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-              
-              {/* Form Input Container */}
-              <div className="lg:col-span-2 space-y-6">
+            <div className="bg-slate-900 border border-slate-850 rounded-3xl p-6 sm:p-8 space-y-6 max-w-3xl mx-auto">
                 
-                {/* Section b1: Business Identity */}
-                <div className="p-5 sm:p-6 bg-[#0c142c]/50 border border-slate-800 rounded-2xl space-y-4">
-                  <span className="text-[10px] font-mono text-cyan-400 font-black uppercase tracking-widest block border-b border-slate-800 pb-1.5">Business &amp; Contact Information</span>
+                {/* Section 1: Business Details */}
+                <div className="space-y-4 text-left">
+                  <span className="text-[10px] font-mono text-cyan-400 font-black uppercase tracking-widest block border-b border-slate-800 pb-2">1. Contact &amp; Business Information</span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-mono uppercase text-slate-500">Business Name *</label>
@@ -844,9 +783,10 @@ export default function ClientIntake() {
                       />
                     </div>
                     <div className="space-y-1.5 font-sans">
-                      <label className="text-[10px] font-mono uppercase text-slate-500">Contact Phone</label>
+                      <label className="text-[10px] font-mono uppercase text-slate-500">Phone Number *</label>
                       <input 
                         type="text" 
+                        required
                         value={formData.phone} 
                         onChange={(e) => fillFormValue('phone', e.target.value)}
                         placeholder="e.g. +61 400 123 456"
@@ -854,227 +794,254 @@ export default function ClientIntake() {
                       />
                     </div>
 
-                    <div className="space-y-1.5 sm:col-span-2 border-t border-slate-800/60 pt-4 mt-2">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-1">
-                        <label className="text-[10px] font-mono uppercase text-cyan-400 font-bold tracking-wider flex items-center gap-1.5">
-                          🎁 Promotional Code / Partner Voucher
-                        </label>
-                      </div>
-                      <div className="relative">
-                        <input 
-                          type="text" 
-                          value={promoCode} 
-                          onChange={(e) => handlePromoCodeChange(e.target.value)}
-                          placeholder="Enter your partner allocation code if applicable"
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-xs text-white uppercase tracking-wider font-mono outline-none focus:border-cyan-500 placeholder:normal-case placeholder:tracking-normal"
-                        />
-                        {discountPercentage > 0 ? (
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-emerald-950/90 text-emerald-400 border border-emerald-800/40 text-[9px] font-mono font-bold uppercase rounded-lg">
-                            CODE ACTIVE
-                          </span>
-                        ) : promoCode.trim() ? (
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 text-[10px] font-mono select-none">
-                            Verifying...
-                          </span>
-                        ) : null}
-                      </div>
-                      {discountPercentage > 0 && (
-                        <p className="text-[10px] text-emerald-400 font-light mt-1.5 leading-relaxed font-mono">
-                          ✓ Partnership voucher code active. Adjusted setup co-investment rates are calculated on your proposal.
-                        </p>
-                      )}
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-mono uppercase text-slate-500">Current website URL (Optional)</label>
+                      <input 
+                        type="text" 
+                        value={formData.website_url || ''} 
+                        onChange={(e) => fillFormValue('website_url', e.target.value)}
+                        placeholder="e.g. https://mycurrentsite.com"
+                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-cyan-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-mono uppercase text-slate-500">Business / Industry Type *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={formData.industry} 
+                        onChange={(e) => fillFormValue('industry', e.target.value)}
+                        placeholder="e.g. Local trade business, Legal consulting, Gym"
+                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-cyan-500"
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* Section b1.5: Package Selection */}
-                <div className="p-5 sm:p-6 bg-[#0c142c]/50 border border-slate-800 rounded-2xl space-y-3">
-                  <span className="text-[10px] font-mono text-cyan-400 font-black uppercase tracking-widest block border-b border-slate-800 pb-1.5">Package Selection</span>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {Object.values(appPackages).map(pkg => {
+                {/* Section 2: Website Preferred Level */}
+                <div className="space-y-4 pt-4 text-left">
+                  <span className="text-[10px] font-mono text-cyan-400 font-black uppercase tracking-widest block border-b border-slate-850 pb-2">
+                    2. Select Your Preferred Website Level
+                  </span>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      {
+                        id: 'landing_page',
+                        name: 'Starter Website',
+                        price: 'from A$1,500',
+                        desc: 'Perfect for single marketing campaigns, new offers, or testing a business idea.'
+                      },
+                      {
+                        id: 'small_business_website',
+                        name: 'Business Website',
+                        price: 'from A$3,500',
+                        desc: 'Ideal for local services, trades, consultants, and established small businesses.'
+                      },
+                      {
+                        id: 'growth_website_client_workflow',
+                        name: 'Growth Website',
+                        price: 'from A$5,500+',
+                        desc: 'For businesses that want a stronger online presence, booking support, and smooth client follow-up.'
+                      }
+                    ].map(pkg => {
                       const isSelected = formData.selected_package === pkg.id;
                       return (
                         <button
                           key={pkg.id}
                           type="button"
-                          onClick={() => fillFormValue('selected_package', pkg.id)}
-                          className={`p-4 text-left rounded-xl border cursor-pointer select-none transition-all flex flex-col justify-start space-y-1.5 ${
-                            isSelected 
-                              ? 'bg-cyan-950/40 border-cyan-500 shadow-lg shadow-cyan-500/10' 
-                              : 'bg-slate-950/60 border-slate-850 hover:border-slate-750'
-                          }`}
-                        >
-                          <span className={`text-sm font-bold block ${isSelected ? 'text-cyan-300' : 'text-slate-200'}`}>
-                            {pkg.label}
-                          </span>
-                          <span className="text-xs font-mono text-slate-400 block mb-1">
-                            from A${pkg.basePrice.toLocaleString()}
-                          </span>
-                          <span className={`text-[10px] leading-snug block ${isSelected ? 'text-cyan-100' : 'text-slate-500'}`}>
-                            {pkg.description}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Section b2: Pages Needed */}
-                <div className="p-5 sm:p-6 bg-[#0c142c]/50 border border-slate-800 rounded-2xl space-y-3">
-                  <span className="text-[10px] font-mono text-cyan-400 font-black uppercase tracking-widest block border-b border-slate-800 pb-1.5">Proposed Standard Pages</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {['Home', 'About', 'Services', 'Contact', 'FAQ', 'Gallery', 'Testimonials', 'Portfolio / Projects', 'Pricing', 'Locations / Service Areas'].map(page => {
-                      const isSelected = formData.selected_pages.includes(page);
-                      return (
-                        <button
-                          key={page}
-                          type="button"
-                          onClick={() => toggleFormArray('selected_pages', page)}
-                          className={`p-3 text-left rounded-xl border text-xs font-semibold cursor-pointer select-none transition-all ${
-                            isSelected 
-                              ? 'bg-cyan-950/40 border-cyan-500 text-cyan-300' 
-                              : 'bg-slate-950/60 border-slate-850 text-slate-400 hover:border-slate-750 hover:text-slate-200'
-                          }`}
-                        >
-                          📄 {page}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Section b3: Premium Modules / Features */}
-                <div className="p-5 sm:p-6 bg-[#0c142c]/50 border border-slate-800 rounded-2xl space-y-3">
-                  <span className="text-[10px] font-mono text-cyan-400 font-black uppercase tracking-widest block border-b border-slate-800 pb-1.5">Special Workflow Add-ons</span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {[
-                      { key: 'booking_calendar_page', name: 'Booking Calendar Integration', desc: 'Syncs with external platforms or simple scheduling' },
-                      { key: 'advanced_quote_form', name: 'Advanced Quote / Inquiry Form', desc: 'Dynamic fields or multi-selection tools' },
-                      { key: 'multi_step_intake_form', name: 'Multi-Step Intake Process', desc: 'Detailed onboarding pipeline form' },
-                      { key: 'email_notification_automation', name: 'Email Notification Automation', desc: 'Automated confirmations and follow-ups' },
-                      { key: 'simple_lead_tracking_dashboard', name: 'Simple Lead Tracking Dashboard', desc: 'Internal viewer for captured leads/inquiries' },
-                      { key: 'blog_or_news_setup', name: 'Blog or News Layout Setup', desc: 'CMS collection structure for publishing articles' },
-                      { key: 'service_area_pages', name: 'Dedicated Service Area Pages', desc: 'Per region landing routes for local SEO' },
-                      { key: 'basic_booking_embed', name: 'Basic Booking Embed Only', desc: 'Simple copy & paste calendar widget' },
-                      { key: 'ecommerce_or_payment_setup', name: 'E-Commerce / Payment Links', desc: 'Cart setup. Subject to final review.' },
-                    ].map(feat => {
-                      const isSelected = formData.selected_addons.includes(feat.key);
-                      // Let's compute if it's included inside the selected package
-                      const isIncluded = isAddonIncludedInPackage(feat.key, formData.selected_package);
-                      const checkmark = isIncluded ? ' (Included)' : '';
-
-                      return (
-                        <button
-                          key={feat.key}
-                          type="button"
                           onClick={() => {
-                            if (!isIncluded) toggleFormArray('selected_addons', feat.key);
+                            fillFormValue('selected_package', pkg.id);
+                            // Pre-fill pages array according to package defaults to keep backend logic seamless
+                            if (pkg.id === 'landing_page') {
+                              fillFormValue('selected_pages', ['Home']);
+                            } else if (pkg.id === 'small_business_website') {
+                              fillFormValue('selected_pages', ['Home', 'About', 'Services', 'Contact']);
+                            } else {
+                              fillFormValue('selected_pages', ['Home', 'About', 'Services', 'Contact', 'Blog', 'Booking']);
+                            }
                           }}
-                          className={`p-3 text-left rounded-xl border cursor-pointer select-none transition-all flex flex-col justify-start space-y-1 ${
-                            isSelected || isIncluded
-                              ? 'bg-cyan-950/40 border-cyan-500 text-cyan-300' 
-                              : 'bg-slate-950/60 border-slate-850 text-slate-400 hover:border-slate-750'
+                          className={`p-5 text-left rounded-2xl border text-xs cursor-pointer select-none transition-all flex flex-col justify-between space-y-3 ${
+                            isSelected 
+                              ? 'bg-cyan-950/25 border-cyan-500 text-white shadow-[0_0_15px_rgba(34,211,238,0.15)]' 
+                              : 'bg-slate-950/50 border-slate-850 text-slate-400 hover:border-slate-800 hover:text-slate-200'
                           }`}
                         >
-                          <span className="text-xs font-bold block">{feat.name} {checkmark}</span>
-                          <span className={`text-[10px] font-light leading-snug block ${isSelected || isIncluded ? 'text-cyan-400' : 'text-slate-500'}`}>{feat.desc}</span>
+                          <div>
+                            <span className={`text-base font-bold block ${isSelected ? 'text-cyan-400' : 'text-white'}`}>
+                              {pkg.name}
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-400 block mt-0.5 uppercase tracking-wide">
+                              {pkg.price}
+                            </span>
+                          </div>
+                          
+                          <p className="text-[11px] leading-relaxed text-slate-400 font-light">
+                            {pkg.desc}
+                          </p>
+                          
+                          <div className="flex items-center gap-1.5 pt-2">
+                            <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isSelected ? 'border-cyan-400 bg-cyan-400/20' : 'border-slate-700'}`}>
+                              {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                            </div>
+                            <span className={`text-[10px] uppercase font-mono font-bold tracking-wider ${isSelected ? 'text-cyan-400' : 'text-slate-500'}`}>
+                              {isSelected ? '✓ Selected' : 'Choose Level'}
+                            </span>
+                          </div>
                         </button>
                       );
                     })}
                   </div>
+                         {/* Section 3: Budget and Timeline */}
+                <div className="space-y-4 pt-4 text-left">
+                  <span className="text-[10px] font-mono text-cyan-400 font-black uppercase tracking-widest block border-b border-slate-850 pb-2">
+                    3. Budget &amp; Timeline
+                  </span>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] font-mono uppercase text-slate-500">Proposed Budget Range *</label>
+                      <select 
+                        value={formData.budget_range}
+                        onChange={(e) => fillFormValue('budget_range', e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700/80 focus:border-cyan-500 rounded-xl px-3.5 py-3 text-xs text-white outline-none transition-all font-sans"
+                      >
+                        <option value="A$1,500–A$2,500">A$1,500 – A$2,500 (Starter website)</option>
+                        <option value="A$3,500–A$4,500">A$3,500 – A$4,500 (Standard Business Website)</option>
+                        <option value="A$4,500–A$6,500">A$4,500 – A$6,500 (Expanded Business Hub)</option>
+                        <option value="A$6,500–A$10,000">A$6,500 – A$10,000 (Growth/Custom Business Workflow)</option>
+                        <option value="A$10,000+">A$10,000+ (Custom bespoke platform integration)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] font-mono uppercase text-slate-500">Desired Timeline *</label>
+                      <select 
+                        value={formData.timeline}
+                        onChange={(e) => fillFormValue('timeline', e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700/80 focus:border-cyan-500 rounded-xl px-3.5 py-3 text-xs text-white outline-none transition-all font-sans"
+                      >
+                        <option value="Under 2 weeks">Urgent (Under 2 weeks)</option>
+                        <option value="2–4 weeks">Standard (2–4 weeks)</option>
+                        <option value="1–2 months">Flexible (1–2 months)</option>
+                        <option value="No rush">Bespoke phase (No rush)</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Section b4: Special Requests / Custom Integration */}
-                <div className="p-5 sm:p-6 bg-[#0c142c]/50 border border-slate-800 rounded-2xl space-y-4">
-                  <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
-                    <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-widest block">Additional Requirements &amp; Special Requests</span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-light leading-relaxed">
-                    Need any bespoke platform capabilities? Enter details like multilingual setup, custom CRM sync, member portals, API feeds, etc. 
-                    <span className="text-cyan-400 font-mono font-bold block mt-1">💡 The Live Quote Telemetry will automatically adjust and recalculate instantly!</span>
-                  </p>
-                  <div className="space-y-1.5">
-                    <textarea 
-                      value={formData.notes} 
-                      onChange={(e) => fillFormValue('notes', e.target.value)}
-                      placeholder="e.g. I need bilingual support in German & English, or please connect contact leads to HubSpot CRM"
-                      className="w-full h-24 bg-slate-950 border border-slate-850 rounded-xl px-3.5 py-3 text-xs text-white placeholder:text-slate-600 outline-none focus:border-cyan-500 transition-all font-sans leading-relaxed resize-none"
-                    />
-                    {formData.notes.trim().length >= 4 && (
-                      <div className="p-3.5 bg-cyan-950/20 border border-cyan-500/10 rounded-xl space-y-1.5 text-left animate-pulse">
-                        <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-widest block">✓ Dynamic Surcharges Applied:</span>
-                        <div className="space-y-1">
-                          {calculateSpecialRequestSurcharge(formData.notes).items.map((item, idx) => (
-                            <span key={idx} className="block text-[10px] text-slate-300 font-mono font-light leading-normal">
-                              • {item}
-                            </span>
-                          ))}
-                        </div>
+                {/* Section 4: Specific Project Details */}
+                <div className="space-y-4 pt-4 text-left">
+                  <span className="text-[10px] font-mono text-cyan-400 font-black uppercase tracking-widest block border-b border-slate-850 pb-2">
+                    4. Specific Project Requirements
+                  </span>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] font-mono uppercase text-slate-500 block">Current Online Presence / Socials</label>
+                      <input 
+                        type="text"
+                        value={formData.current_online_presence} 
+                        onChange={(e) => fillFormValue('current_online_presence', e.target.value)}
+                        placeholder="Current website domain, Instagram handle, Facebook page, etc."
+                        className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700/80 focus:border-cyan-500 rounded-xl px-3.5 py-3 text-xs text-slate-200 outline-none transition-all font-sans"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[10px] font-mono uppercase text-slate-500 block">Who is your ideal target audience?</label>
+                        <textarea 
+                          value={formData.target_audience} 
+                          onChange={(e) => fillFormValue('target_audience', e.target.value)}
+                          placeholder="e.g. Local homeowners, corporate clients in Sydney, etc."
+                          className="w-full h-24 bg-slate-950 border border-slate-800 hover:border-slate-700/80 focus:border-cyan-500 rounded-xl px-3.5 py-3 text-xs text-slate-200 placeholder:text-slate-600 outline-none focus:ring-1 focus:ring-cyan-500/10 transition-all font-sans leading-relaxed resize-none"
+                        />
                       </div>
-                    )}
+                      
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[10px] font-mono uppercase text-slate-500 block">Any reference websites you like?</label>
+                        <textarea 
+                          value={formData.reference_websites} 
+                          onChange={(e) => fillFormValue('reference_websites', e.target.value)}
+                          placeholder="Links to competitors or websites with a style you admire."
+                          className="w-full h-24 bg-slate-950 border border-slate-800 hover:border-slate-700/80 focus:border-cyan-500 rounded-xl px-3.5 py-3 text-xs text-slate-200 placeholder:text-slate-600 outline-none focus:ring-1 focus:ring-cyan-500/10 transition-all font-sans leading-relaxed resize-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] font-mono uppercase text-slate-500 block">General Notes &amp; Core Requirements</label>
+                      <textarea 
+                        value={formData.notes} 
+                        onChange={(e) => fillFormValue('notes', e.target.value)}
+                        placeholder="Tell us what this website should focus on, specific pages you need, or special interactive features."
+                        className="w-full h-28 bg-slate-950 border border-slate-800 hover:border-slate-700/80 focus:border-cyan-500 rounded-xl px-3.5 py-3 text-xs text-slate-200 placeholder:text-slate-600 outline-none focus:ring-1 focus:ring-cyan-500/10 transition-all font-sans leading-relaxed resize-none"
+                      />
+                    </div>
                   </div>
+                </div>
+
+                {/* Promo Code area */}
+                <div className="pt-2 flex items-center justify-between gap-4 border-t border-slate-800/50">
+                  <div className="space-y-1 text-left">
+                    <span className="text-[10px] font-mono uppercase text-slate-500">Voucher / Referral Code (Optional)</span>
+                    <input 
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => {
+                        setPromoCode(e.target.value);
+                        if (e.target.value.trim().toUpperCase() === "CLARITY10") {
+                          setDiscountPercentage(10);
+                        } else {
+                          setDiscountPercentage(0);
+                        }
+                      }}
+                      placeholder="Enter promo code"
+                      className="bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-cyan-500 rounded-xl px-3 py-1.5 text-[10px] text-white font-mono uppercase outline-none w-36"
+                    />
+                  </div>
+                  
+                  {discountPercentage > 0 && (
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
+                      ✓ CLARITY10 Code Applied (-10% Savings)
+                    </span>
+                  )}
                 </div>
 
               </div>
 
-              {/* Scope Estimator Sidebar Card */}
-              <div className="space-y-6">
-                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 space-y-4 sticky top-24">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400 font-black block">Live Quote Telemetry</span>
-                  
-                  <div className="space-y-2 pb-3 border-b border-slate-800">
-                    <span className="text-slate-400 text-xs font-light">Calculated Fixed Price</span>
-                    {discountPercentage > 0 ? (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm line-through text-slate-500 font-mono">A${calculateDerivedQuote(true).toLocaleString()}.00</span>
-                          <span className="px-1.5 py-0.5 bg-emerald-950/80 text-emerald-400 text-[9px] font-mono font-bold rounded-md">
-                            -{discountPercentage}% PROMO
-                          </span>
-                        </div>
-                        <h3 className="text-3xl font-black text-emerald-400 font-mono">
-                          A${calculateDerivedQuote().toLocaleString()}.00
-                        </h3>
-                      </div>
-                    ) : (
-                      <h3 className="text-3xl font-black text-white font-mono">A${calculateDerivedQuote().toLocaleString()}.00</h3>
-                    )}
-                    <p className="text-[10px] text-slate-500 font-light leading-relaxed mt-1">
-                      Final pricing depends on content, integrations, revisions, and whether custom functionality is required.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2.5 text-xs font-light leading-relaxed">
-                    <div className="flex justify-between text-slate-300">
-                      <span>Includes Pages:</span>
-                      <span className="font-semibold text-white">{formData.selected_pages.length} Pages</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span>Includes Features:</span>
-                      <span className="font-semibold text-white">{formData.selected_addons.length} Features</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span>Timeline:</span>
-                      <span className="font-semibold text-white">2-3 weeks</span>
-                    </div>
-                  </div>
-
-                  {errorText && (
-                    <div className="p-3 bg-red-950/30 border border-red-500/20 text-red-300 text-xs rounded-xl font-medium">
-                      {errorText}
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleCreateNewProject}
-                    disabled={submitting}
-                    className="w-full py-3.5 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-bold rounded-xl text-xs uppercase tracking-wider transition hover:opacity-90 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Proposal & Agreement'}
-                  </button>
+              {errorText && (
+                <div className="p-3.5 bg-red-950/20 border border-red-500/10 text-red-300 text-xs rounded-xl font-medium text-left">
+                  {errorText}
                 </div>
+              )}
+
+              {/* Submit Buttons */}
+              <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveStep('welcome')}
+                  className="px-6 py-3 bg-slate-950 border border-slate-850 hover:border-slate-750 text-slate-400 hover:text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition cursor-pointer select-none"
+                >
+                  Cancel &amp; Home
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={handleCreateNewProject}
+                  disabled={submitting}
+                  className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:opacity-90 text-slate-950 font-bold rounded-xl text-xs uppercase tracking-wider transition shadow-md shadow-cyan-500/15 flex items-center justify-center gap-2 cursor-pointer select-none"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Submitting Request...
+                    </>
+                  ) : (
+                    'Submit Website Request'
+                  )}
+                </button>
               </div>
 
             </div>
@@ -1597,7 +1564,7 @@ export default function ClientIntake() {
                   {[
                     { key: 'branding_readiness_logo', label: 'Company Brand Logo Available?', desc: 'SVG vector format handles high-resolution scaling best' },
                     { key: 'content_readiness_copy', label: 'Copywriting / Page Texts and Service Outline?', desc: 'pasted details or draft Google Doc works fine' },
-                    { key: 'domain_status', label: 'Domain Name and Credentials Active?', desc: 'Custom address e.g. matesplace.au registered' },
+                    { key: 'domain_status', label: 'Domain Name and Credentials Active?', desc: 'Custom address e.g. yourbusiness.com.au registered' },
                   ].map(asset => {
                     const activeVal = projectData[asset.key] || 'no';
                     return (
@@ -1778,10 +1745,10 @@ export default function ClientIntake() {
           <div className="py-6 space-y-8 animate-fadeIn text-left max-w-3xl mx-auto">
             <div className="space-y-2">
               <span className="px-3 py-1 border border-cyan-800/40 bg-cyan-950/20 text-cyan-400 text-[10px] font-mono tracking-widest uppercase rounded-full">
-                Milestone 4 — Active Build Assembly
+                Milestone 4 — Website Build Progress
               </span>
-              <h2 className="text-3xl font-black text-white mt-4">Code Assembly &amp; Staging Boards</h2>
-              <p className="text-slate-400 text-xs sm:text-sm font-light mt-1">David is actively building your responsive layout. Review mock staging telemetry blocks real-time below.</p>
+              <h2 className="text-3xl font-black text-white mt-4">Website Build Progress</h2>
+              <p className="text-slate-400 text-xs sm:text-sm font-light mt-1">David is actively building your responsive layout. Review layout design and build updates below in real-time.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
@@ -1886,64 +1853,6 @@ export default function ClientIntake() {
               
               <div className="lg:col-span-2 space-y-6">
                 
-                {/* Interactive Feedback notes / Chat stream */}
-                <div className="bg-slate-900 border border-slate-850 rounded-3xl p-5 space-y-4">
-                  <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wide block">Interactive Feedback Board</span>
-                  
-                  {/* Chat messages */}
-                  <div className="bg-slate-950 border border-slate-855 rounded-2xl p-4 h-48 overflow-y-auto space-y-3.5 custom-scrollbar text-xs font-light">
-                    {chatMessages.length === 0 ? (
-                      <p className="text-slate-500 italic text-center pt-12">No revision items logged yet. Pitch questions or text changes below!</p>
-                    ) : (
-                      chatMessages.map((msg, idx) => {
-                        const isAdmin = msg.submitted_by === 'admin' || msg.contact_name === 'Support / Developer';
-                        return (
-                          <div key={idx} className={`space-y-1 p-2.5 border rounded-xl relative ${
-                            isAdmin 
-                              ? 'bg-cyan-950/20 border-cyan-850/40 text-cyan-200' 
-                              : 'bg-[#020617] border-slate-850 text-slate-300'
-                          }`}>
-                            <div className="flex justify-between items-center text-[10px] font-mono">
-                              <span className={`font-bold ${isAdmin ? 'text-cyan-400' : 'text-slate-450'}`}>
-                                {isAdmin ? 'Support / Developer' : (msg.contact_name || 'Client')}
-                              </span>
-                              <span className="text-slate-500">
-                                {msg.submitted_at ? new Date(msg.submitted_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'}
-                              </span>
-                            </div>
-                            <p className="leading-relaxed font-light">{msg.feedback_text || msg.message || msg.notes}</p>
-                            
-                            {msg.admin_response && (
-                              <div className="mt-2 p-2 bg-cyan-950/40 border border-cyan-800/40 rounded-lg space-y-1">
-                                <span className="block text-[9.5px] font-bold text-cyan-400 font-mono uppercase">Developer Reply:</span>
-                                <p className="text-slate-300 font-light leading-normal">{msg.admin_response}</p>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-
-                  {/* Message submitform */}
-                  <form onSubmit={handlePostChatFeedback} className="flex gap-2">
-                    <input 
-                      type="text"
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      placeholder="Type copywriting tweaks or styling feedback..."
-                      className="flex-1 bg-slate-950 border border-slate-850 focus:border-cyan-500 rounded-xl px-3 py-2.5 text-xs text-white outline-none"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isSendingChat || !chatInput.trim()}
-                      className="px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-xs uppercase cursor-pointer disabled:opacity-50"
-                    >
-                      {isSendingChat ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Log Tweak'}
-                    </button>
-                  </form>
-                </div>
-
                 {/* Staging Links parameters */}
                 <div className="bg-slate-900 border border-slate-850 rounded-3xl p-5 space-y-4 text-xs font-light">
                   <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wide block">Staging Server Details</span>
@@ -1957,7 +1866,7 @@ export default function ClientIntake() {
                     </div>
                     <div className="p-4 bg-slate-950/70 border border-slate-850 rounded-2xl space-y-1">
                       <span className="text-slate-500 block text-[10px] font-mono uppercase">Production URL target:</span>
-                      <span className="text-white font-mono font-medium block pt-1">{projectData.domain_name || 'matesplace.au'}</span>
+                      <span className="text-white font-mono font-medium block pt-1">{projectData.domain_name || 'yourbusiness.com.au'}</span>
                     </div>
                   </div>
                 </div>
@@ -2039,6 +1948,94 @@ export default function ClientIntake() {
                 </div>
               </div>
 
+            </div>
+          </div>
+        )}
+
+        {/* =======================================================
+            PATH H: SUCCESS / ENQUIRY RECEIVED CONFIRMATION
+            ======================================================= */}
+        {activeStep === 'success' && (
+          <div className="py-12 space-y-8 animate-fadeIn max-w-2xl mx-auto text-center font-sans">
+            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckSquare className="w-8 h-8" />
+            </div>
+            
+            <div className="space-y-3">
+              <span className="px-3 py-1 border border-emerald-800/40 bg-emerald-950/20 text-emerald-400 text-[10px] font-mono tracking-widest uppercase rounded-full">
+                Enquiry Received
+              </span>
+              <h2 className="text-3xl font-black text-white tracking-tight">Website request submitted!</h2>
+              <p className="text-slate-350 font-light text-sm sm:text-base leading-relaxed max-w-lg mx-auto">
+                Thanks — your website request has been received. I’ll review your business and send back a simple website plan, price and next steps.
+              </p>
+            </div>
+
+            {projectData && projectData.secure_token && (
+              <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 text-left max-w-md mx-auto space-y-3">
+                <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-black block">Your Project Secure Token</span>
+                <p className="text-xs text-slate-400 font-light leading-relaxed">
+                  Use this private tracking code to check status or resume your project from any device:
+                </p>
+                <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-2 rounded-xl">
+                  <span className="text-xs font-mono text-white font-bold select-all truncate flex-1 md:min-w-0">
+                    {projectData.secure_token}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(projectData.secure_token || '');
+                      setCopiedResume(true);
+                      setTimeout(() => setCopiedResume(false), 2000);
+                    }}
+                    className="px-2.5 py-1 rounded-lg text-[9px] font-mono uppercase bg-slate-900 border border-slate-800 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 transition cursor-pointer"
+                  >
+                    {copiedResume ? 'Copied ✓' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  if (projectData && projectData.secure_token) {
+                    setActiveStep('assets');
+                  } else {
+                    setActiveStep('welcome');
+                  }
+                }}
+                className="p-5 bg-gradient-to-br from-slate-900 to-[#121c38] border border-slate-800 rounded-2xl text-left cursor-pointer transition hover:border-slate-700/80 hover:-translate-y-0.5"
+              >
+                <div className="w-8 h-8 rounded-lg bg-cyan-950/40 border border-cyan-800/30 flex items-center justify-center mb-2">
+                  <Upload className="w-4 h-4 text-cyan-400" />
+                </div>
+                <h4 className="text-xs font-bold text-white uppercase tracking-tight">Upload logo/content</h4>
+                <p className="text-[10px] text-slate-500 font-light mt-1">Provide logos, images, text drafts, and branding preferences now.</p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveStep('welcome')}
+                className="p-5 bg-gradient-to-br from-slate-900 to-[#121c38] border border-slate-800 rounded-2xl text-left cursor-pointer transition hover:border-slate-700/80 hover:-translate-y-0.5"
+              >
+                <div className="w-8 h-8 rounded-lg bg-cyan-950/40 border border-cyan-800/30 flex items-center justify-center mb-2">
+                  <ArrowRight className="w-4 h-4 text-cyan-400" />
+                </div>
+                <h4 className="text-xs font-bold text-white uppercase tracking-tight">Add details later</h4>
+                <p className="text-[10px] text-slate-500 font-light mt-1">Check back anytime or close this window. We've saved your details.</p>
+              </button>
+            </div>
+
+            <div className="pt-4">
+              <button
+                type="button"
+                onClick={() => setActiveStep('welcome')}
+                className="text-xs font-mono text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
+              >
+                Return to Homepage
+              </button>
             </div>
           </div>
         )}

@@ -66,8 +66,6 @@ export default function Home() {
   const [recentQuotePath, setRecentQuotePath] = useState<string | null>(null);
   const [recentQuoteName, setRecentQuoteName] = useState<string | null>(null);
   const [lastViewedStep, setLastViewedStep] = useState<string | null>(null);
-  const [isLoggingView, setIsLoggingView] = useState(false);
-  const [viewLoggedSuccess, setViewLoggedSuccess] = useState(false);
   
   const location = useLocation();
 
@@ -91,67 +89,6 @@ export default function Home() {
       }
     } catch(e) {}
   }, []);
-
-  const handleLogSessionView = async () => {
-    if (!recentProjectToken) return;
-    setIsLoggingView(true);
-    try {
-      const timestamp = new Date().toISOString();
-      const logEntry = {
-        timestamp,
-        message: `Client logged a portal view from the tracking active project banner on Home Page.`,
-        user: 'Client'
-      };
-
-      if (isFirebaseConfigured) {
-        let docId = "";
-        let finalColl = "";
-        let existingLogs: any[] = [];
-
-        const intakesQuery = query(collection(db, "intakes"), where("secure_token", "==", recentProjectToken));
-        const intakesSnap = await getDocs(intakesQuery);
-        if (!intakesSnap.empty) {
-          docId = intakesSnap.docs[0].id;
-          finalColl = "intakes";
-          existingLogs = intakesSnap.docs[0].data().activity_log || [];
-        } else {
-          const outreachQuery = query(collection(db, "outreachLeads"), where("secure_token", "==", recentProjectToken));
-          const outreachSnap = await getDocs(outreachQuery);
-          if (!outreachSnap.empty) {
-            docId = outreachSnap.docs[0].id;
-            finalColl = "outreachLeads";
-            existingLogs = outreachSnap.docs[0].data().activity_log || [];
-          }
-        }
-
-        if (docId && finalColl) {
-          await updateDoc(doc(db, finalColl, docId), {
-            activity_log: [...existingLogs, logEntry],
-            updated_at: serverTimestamp()
-          });
-        }
-      } else {
-        const localItemsStr = localStorage.getItem('clarity_local_submissions') || '[]';
-        const localItems = JSON.parse(localItemsStr);
-        const index = localItems.findIndex((item: any) => item.data?.secure_token === recentProjectToken);
-        if (index !== -1) {
-          const existingLogs = localItems[index].data?.activity_log || [];
-          localItems[index].data = {
-            ...localItems[index].data,
-            activity_log: [...existingLogs, logEntry],
-            updated_at: timestamp
-          };
-          localStorage.setItem('clarity_local_submissions', JSON.stringify(localItems));
-        }
-      }
-      setViewLoggedSuccess(true);
-      setTimeout(() => setViewLoggedSuccess(false), 3000);
-    } catch (e) {
-      console.warn("Error logging session view: ", e);
-    } finally {
-      setIsLoggingView(false);
-    }
-  };
 
   useEffect(() => {
     // Parse query parameter ?sec=
@@ -273,26 +210,6 @@ export default function Home() {
               Resume {lastViewedStep.charAt(0).toUpperCase() + lastViewedStep.slice(1)} Step <ChevronRight className="w-3 h-3" />
             </Link>
           )}
-
-          <button 
-            disabled={isLoggingView || viewLoggedSuccess}
-            onClick={handleLogSessionView} 
-            className="inline-flex items-center gap-1 bg-transparent hover:bg-white/5 border border-cyan-500/30 hover:border-cyan-400/50 text-cyan-400 disabled:text-cyan-600 disabled:border-cyan-950 px-2.5 py-1 rounded text-xs font-bold transition cursor-pointer select-none"
-          >
-            {isLoggingView ? (
-              <span>Logging...</span>
-            ) : viewLoggedSuccess ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-450" />
-                <span>View Logged ✓</span>
-              </>
-            ) : (
-              <>
-                <Activity className="w-3.5 h-3.5" />
-                <span>Log View</span>
-              </>
-            )}
-          </button>
         </div>
       ) : recentQuotePath ? (
         <div className="bg-[#051524] text-cyan-200 py-3 px-4 text-center text-sm font-medium border-b border-cyan-800/80 z-[60] flex items-center justify-center gap-2 fixed top-0 w-full shadow-md">

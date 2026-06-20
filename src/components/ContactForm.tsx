@@ -156,7 +156,7 @@ export default function ContactForm({
   };
 
   const primaryTargetUrl = getIntakeUrl();
-  const primaryCtaText = isProposalPage ? "Start Project Intake" : "Request Website Quote";
+  const primaryCtaText = isProposalPage ? "Start Project Intake" : "Get a Website Quote";
 
   return (
     <section 

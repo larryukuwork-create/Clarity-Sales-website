@@ -1057,14 +1057,14 @@ export default function ProjectStatus() {
               <span>Interactive Step-by-Step Onboarding Available</span>
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed font-sans font-light max-w-xl">
-              This Client Portal is synchronized in real-time with your digital onboarding workspace. If you are completing initial milestones (signing proposal SOW, confirming deposit payments, or uploading brand assets), we recommend using our step-by-step wizard.
+              This Client Portal is synchronized in real-time with your digital onboarding workspace. If you are completing initial milestones (approving your website plan, confirming deposit payments, or uploading brand assets), we recommend using our step-by-step wizard.
             </p>
           </div>
           <Link
             to={`/client-intake?token=${secureToken}`}
-            className="w-full md:w-auto px-5 py-3.5 bg-cyan-500 hover:bg-cyan-450 text-slate-950 font-black rounded-2xl text-[11px] uppercase tracking-wider transition-all shadow-md hover:shadow-cyan-500/10 flex items-center justify-center gap-1.5 cursor-pointer shrink-0 z-10"
+            className="w-full md:w-auto px-5 py-3.5 bg-cyan-500 hover:bg-cyan-455 text-slate-950 font-black rounded-2xl text-[11px] uppercase tracking-wider transition-all shadow-md hover:shadow-cyan-500/10 flex items-center justify-center gap-1.5 cursor-pointer shrink-0 z-10"
           >
-            <span>Launch Intake Wizard</span>
+            <span>Open Project Wizard</span>
             <ArrowRight className="w-4 h-4 text-slate-950" />
           </Link>
         </div>
@@ -1103,11 +1103,11 @@ export default function ProjectStatus() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <span className="text-[9px] font-mono text-cyan-400 font-extrabold uppercase tracking-widest bg-cyan-950/50 border border-cyan-800/30 px-2.5 py-1 rounded-md">
-                Interactive Proposal SOW Contract
+                Interactive Estimate &amp; Website Plan
               </span>
-              <h3 className="font-bold text-white text-lg sm:text-xl mt-2 tracking-tight">Interactive SOW Estimate &amp; Quote</h3>
+              <h3 className="font-bold text-white text-lg sm:text-xl mt-2 tracking-tight">Your Website Estimate &amp; Plan</h3>
               <p className="text-xs text-slate-400 mt-1 font-light leading-relaxed">
-                View your live Statement of Work, check optional high-impact technical extras, and submit your official digital authorization.
+                View your website estimate and timeline, and complete your digital approval signature.
               </p>
             </div>
             {project.status === 'Proposal Approved' || project.scope_approved ? (
@@ -1134,7 +1134,7 @@ export default function ProjectStatus() {
               className="px-5 py-2.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-350 hover:to-blue-450 text-slate-950 font-black rounded-xl text-xs transition duration-200 cursor-pointer shadow-lg shadow-cyan-500/10 flex items-center gap-1.5 self-start"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              <span>Open SOW Proposal Page</span>
+              <span>View Design Quote &amp; Proposal</span>
             </a>
           </div>
         </div>

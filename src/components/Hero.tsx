@@ -68,7 +68,7 @@ export default function Hero({
                 to="/client-intake?source=homepage"
                 className="px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl font-bold font-sans shadow-xl shadow-cyan-500/10 transition-all cursor-pointer text-center select-none block"
               >
-                Request Website Quote
+                Get a Website Quote
               </Link>
               
               <button

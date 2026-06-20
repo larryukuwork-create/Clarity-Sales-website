@@ -4,8 +4,8 @@ import { Check, ShieldCheck } from "lucide-react";
 export default function SimplePricing() {
   const packages = [
     {
-      name: "Landing Page",
-      price: "From $1,500",
+      name: "Starter Website",
+      price: "From A$1,500",
       description: "Perfect for single marketing campaigns, new offers, or testing a business idea.",
       features: [
         "1 long-form scrolling page",
@@ -18,8 +18,8 @@ export default function SimplePricing() {
       popular: false
     },
     {
-      name: "Small Business Website",
-      price: "From $3,500",
+      name: "Business Website",
+      price: "From A$3,500",
       description: "Ideal for local services, trades, consultants, and established small businesses.",
       features: [
         "Up to 5 pages: Home, Services, About, Contact, FAQ/Gallery",
@@ -32,8 +32,8 @@ export default function SimplePricing() {
       popular: true
     },
     {
-      name: "Growth Website & Client Workflow",
-      price: "From $5,500",
+      name: "Growth Website",
+      price: "From A$5,500+",
       description: "For businesses that want a stronger online presence, better enquiries, booking support, and smoother client follow-up.",
       features: [
         "Up to 8–10 website pages",

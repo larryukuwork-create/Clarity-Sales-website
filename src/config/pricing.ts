@@ -21,7 +21,7 @@ export interface AddonConfig {
 export const packages: Record<string, PackageConfig> = {
   landing_page: {
     id: "landing_page",
-    label: "Landing Page",
+    label: "Starter Website",
     basePrice: 1500,
     includedPages: 1,
     recommendedMaxPages: 1,
@@ -37,7 +37,7 @@ export const packages: Record<string, PackageConfig> = {
   },
   small_business_website: {
     id: "small_business_website",
-    label: "Small Business Website",
+    label: "Business Website",
     basePrice: 3500,
     includedPages: 5,
     recommendedMaxPages: 7,
@@ -54,7 +54,7 @@ export const packages: Record<string, PackageConfig> = {
   },
   growth_website_client_workflow: {
     id: "growth_website_client_workflow",
-    label: "Growth Website & Client Workflow",
+    label: "Growth Website",
     basePrice: 5500,
     includedPages: 10,
     recommendedMaxPages: 10,

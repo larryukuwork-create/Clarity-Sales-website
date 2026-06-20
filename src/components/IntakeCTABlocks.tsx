@@ -55,7 +55,7 @@ export default function IntakeCTABlocks() {
                 to="/client-intake?source=homepage&type=project_intake"
                 className="inline-flex items-center gap-2 px-6 py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl font-bold font-sans transition-all w-full sm:w-auto justify-center cursor-pointer select-none"
               >
-                <span>Request Website Quote</span>
+                <span>Get a Website Quote</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>

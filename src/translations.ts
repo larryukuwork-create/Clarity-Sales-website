@@ -17,7 +17,7 @@ export const trans = {
   en: {
     brandName: "Clarity Space",
     brandSubtitle: "Digital Growth",
-    ctaQuote: "Request Website Quote",
+    ctaQuote: "Get a Website Quote",
     navServices: "Services",
     navPricing: "Work / Examples",
     navProcess: "Process",
@@ -187,7 +187,7 @@ export function getPackages(lang: Language, currency: Currency): PricingPackage[
   return [
     {
       id: "landing_page",
-      name: "Landing Page",
+      name: "Starter Website",
       price: `${currency} ${formatPrice(1500, currency)}`,
       priceValue: 1500,
       description: "Perfect for single marketing campaigns, new offers, or testing a business idea.",
@@ -202,7 +202,7 @@ export function getPackages(lang: Language, currency: Currency): PricingPackage[
     },
     {
       id: "small_business_website",
-      name: "Small Business Website",
+      name: "Business Website",
       price: `${currency} ${formatPrice(3500, currency)}`,
       priceValue: 3500,
       description: "Ideal for local services, trades, consultants, and established small businesses.",
@@ -218,8 +218,8 @@ export function getPackages(lang: Language, currency: Currency): PricingPackage[
     },
     {
       id: "growth_website_client_workflow",
-      name: "Growth Website & Client Workflow",
-      price: `${currency} ${formatPrice(5500, currency)}`,
+      name: "Growth Website",
+      price: `${currency} ${formatPrice(5500, currency)}+`,
       priceValue: 5500,
       description: "For businesses that want a stronger online presence, better enquiries, booking support, and smoother client follow-up.",
       includes: [

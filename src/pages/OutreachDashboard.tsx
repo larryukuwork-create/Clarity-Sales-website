@@ -4787,16 +4787,47 @@ Use the information above to assist me with generating content, proposals, or co
                               </div>
                             )}
 
-                            {(curProject.question_text || curProject.notes) && (
+                            {(curProject.question_text || curProject.notes || curProject.current_online_presence || curProject.target_audience || curProject.reference_websites) && (
                               <div className="pt-5 border-t border-slate-800/60 mt-5">
                                 <h4 className="text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-2 font-bold select-none">
-                                  Initial Prospect Request / Notes
+                                  Client Provided Requirements & Raw Data
                                 </h4>
-                                <div className="p-3.5 bg-[#020617] rounded-xl border border-slate-850">
-                                  <p className="text-[13px] font-light text-slate-300 whitespace-pre-wrap leading-relaxed">
-                                    {curProject.question_text ||
-                                      curProject.notes}
-                                  </p>
+                                <div className="space-y-3">
+                                  {(curProject.question_text || curProject.notes) && (
+                                    <div className="p-3.5 bg-[#020617] rounded-xl border border-slate-850 space-y-1">
+                                      <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold block">General Notes & Focus</span>
+                                      <p className="text-[12px] font-light text-slate-300 whitespace-pre-wrap leading-relaxed">
+                                        {curProject.question_text || curProject.notes}
+                                      </p>
+                                    </div>
+                                  )}
+                                  
+                                  {curProject.current_online_presence && (
+                                    <div className="p-3.5 bg-[#020617] rounded-xl border border-slate-850 space-y-1">
+                                      <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold block">Current Online Presence / Socials</span>
+                                      <p className="text-[12px] font-light text-slate-300 whitespace-pre-wrap leading-relaxed break-all">
+                                        {curProject.current_online_presence}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {curProject.target_audience && (
+                                    <div className="p-3.5 bg-[#020617] rounded-xl border border-slate-850 space-y-1">
+                                      <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold block">Target Audience</span>
+                                      <p className="text-[12px] font-light text-slate-300 whitespace-pre-wrap leading-relaxed">
+                                        {curProject.target_audience}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {curProject.reference_websites && (
+                                    <div className="p-3.5 bg-[#020617] rounded-xl border border-slate-850 space-y-1">
+                                      <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold block">Reference Websites</span>
+                                      <p className="text-[12px] font-light text-slate-300 whitespace-pre-wrap leading-relaxed break-all">
+                                        {curProject.reference_websites}
+                                      </p>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             )}

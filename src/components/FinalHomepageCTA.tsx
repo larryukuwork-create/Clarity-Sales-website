@@ -31,7 +31,7 @@ export default function FinalHomepageCTA() {
             to="/client-intake?source=homepage&type=project_intake"
             className="w-full sm:w-auto px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl font-bold font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/10 text-sm sm:text-base shrink-0"
           >
-            <span>Request Website Quote</span>
+            <span>Get a Website Quote</span>
             <ArrowRight className="w-4.5 h-4.5" />
           </Link>
           
