@@ -1,0 +1,8 @@
+{
+  "name": "Clarity Space",
+  "description": "Premium custom web design and digital growth agency for small businesses, local brands and service companies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,47 @@
+# https://www.robotstxt.org/
+# Clarity Space - Digital Architecture & Elite Web Development SEO Rules
+
+# 1. Allow all standard SEO crawler bots
+User-agent: *
+Allow: /
+Allow: /swimming-school-quote
+Allow: /consultant-quote
+Allow: /portfolio-quote
+Allow: /trades-quote
+Allow: /restaurant-quote
+Allow: /local-quote
+Allow: /static-business-quote
+Allow: /swimming-school-quote/demo
+Allow: /consultant-quote/demo
+Allow: /portfolio-quote/demo
+Allow: /trades-quote/demo
+Allow: /restaurant-quote/demo
+Allow: /local-quote/demo
+
+# 2. Expressly cooperate with AI Search and LLM Crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: oai-searchbot
+Allow: /
+
+User-agent: applebot-extended
+Allow: /
+
+User-agent: Gemini-Interactive
+Allow: /
+
+# Specify the XML Sitemap location
+Sitemap: https://clarityspace.com.au/sitemap.xml

@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if true; 
+    }
+
+    match /intakes/{intakeId} {
+      allow create: if true;
+      allow read, update, delete: if true; 
+    }
+
+    match /outreachLeads/{leadId} {
+      allow create, read, update, delete: if true; 
+    }
+
+    match /trackingEvents/{eventId} {
+      allow create: if true;
+      allow read, update, delete: if true; 
+    }
+
+    match /feedbacks/{feedbackId} {
+      allow create: if true;
+      allow read, update, delete: if true;
+    }
+
+    match /agencySettings/{settingId} {
+      allow read, write: if true;
+    }
+
+    match /system_health/{probeId} {
+      allow read, write: if true; 
+    }
+
+    match /waitlist/{itemId} {
+      allow create: if true;
+      allow read, update, delete: if true;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+  }
+}

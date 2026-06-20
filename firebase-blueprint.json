@@ -1,0 +1,129 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "A generated proposal request.",
+      "type": "object",
+      "properties": {
+        "clientName": { "type": "string" },
+        "companyName": { "type": "string" },
+        "clientEmail": { "type": "string" },
+        "websiteUrl": { "type": "string" },
+        "needs": { "type": "string" },
+        "budget": { "type": "string" },
+        "timeline": { "type": "string" },
+        "customNotes": { "type": "string" },
+        "activePackage": { "type": "string" },
+        "activePrice": { "type": "string" },
+        "activeAddons": { "type": "list" },
+        "docId": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["clientName", "clientEmail", "docId", "createdAt"]
+    },
+    "Intake": {
+      "title": "Client Intake",
+      "description": "Detailed project intake form submission",
+      "type": "object",
+      "properties": {
+        "contactName": { "type": "string" },
+        "businessName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "websiteUrl": { "type": "string" },
+        "location": { "type": "string" },
+        "industry": { "type": "string" },
+        "needs": { "type": "string" },
+        "mainGoal": { "type": "string" },
+        "description": { "type": "string" },
+        "targetCustomers": { "type": "string" },
+        "mainServices": { "type": "string" },
+        "pages": { "type": "list" },
+        "functionality": { "type": "list" },
+        "brandColors": { "type": "string" },
+        "socialLinks": { "type": "string" },
+        "referenceWebsites": { "type": "string" },
+        "stylePreference": { "type": "string" },
+        "budget": { "type": "string" },
+        "timeline": { "type": "string" },
+        "needDomainHelp": { "type": "boolean" },
+        "needCopywriting": { "type": "boolean" },
+        "needOngoingSupport": { "type": "boolean" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["contactName", "email", "createdAt"]
+    },
+    "OutreachLead": {
+      "title": "Outreach Lead",
+      "description": "Manual lead created for outreach",
+      "type": "object",
+      "properties": {
+        "businessName": { "type": "string" },
+        "websiteUrl": { "type": "string" },
+        "industry": { "type": "string" },
+        "contactName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "source": { "type": "string" },
+        "notes": { "type": "string" },
+        "proposalLink": { "type": "string" },
+        "suggestedPackage": { "type": "string" },
+        "currency": { "type": "string" },
+        "priceRange": { "type": "string" },
+        "status": { "type": "string" },
+        "lastContacted": { "type": "timestamp" },
+        "nextFollowUp": { "type": "timestamp" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["businessName", "createdAt"]
+    },
+    "WaitlistItem": {
+      "title": "Waitlist Item",
+      "description": "An entry for early access or waitlist.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "archived"] },
+        "timestamp": { "type": "timestamp" }
+      },
+      "required": ["email", "status", "timestamp"]
+    },
+    "Review": {
+      "title": "Review Testimonial",
+      "description": "Client rating and feedback testimonial.",
+      "type": "object",
+      "properties": {
+        "clientName": { "type": "string" },
+        "businessName": { "type": "string" },
+        "rating": { "type": "number" },
+        "feedbackText": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["clientName", "rating", "feedbackText"]
+    }
+  },
+  "firestore": {
+    "leads": {
+      "schema": "Lead",
+      "description": "Stores proposal inquiries submitted from the ContactForm."
+    },
+    "intakes": {
+      "schema": "Intake",
+      "description": "Stores project intake form submissions."
+    },
+    "outreachLeads": {
+      "schema": "OutreachLead",
+      "description": "Stores manual leads for outreach dashboard."
+    },
+    "waitlist": {
+      "schema": "WaitlistItem",
+      "description": "Stores waitlist entries."
+    },
+    "reviews": {
+      "schema": "Review",
+      "description": "Stores client testimonials and feedback."
+    }
+  }
+}

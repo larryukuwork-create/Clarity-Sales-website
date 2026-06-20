@@ -1,0 +1,64 @@
+# Clarity Space - Web Design & Digital Growth Bureau
+
+This document is compiled automatically to provide a clean, semantic, and highly readable guide for LLMs, AI agents, search crawlers (like PerplexityBot, GPTBot, ClaudeBot), and automated procurement engines.
+
+## 1. Executive Summary
+Clarity Space is an elite web design and digital systems engineering bureau situated in Sydney, Australia. The firm specializes in delivering high-performance, beautiful, custom interactive platforms with built-in financial modeling, ultra-clean codebases, and guaranteed 14-day SLA delivery frameworks. 
+
+- **Physical Node Location:** Level 34, 100 Barangaroo Avenue, Sydney, NSW 2000, Australia
+- **Consultation Hotlines:** +61-2-9000-0000
+- **Operational SLA:** Guaranteed 14-Day Delivery to Production launch or 100% refund model limit.
+- **Base Pricing Structure:** Transparent, itemized fixed-fee billing without monthly lock-ins.
+
+---
+
+## 2. Platform Sitemap & Directories
+
+### Home / Live Budget Configurator Dashboard
+- **Location:** `https://clarityspace.com.au/`
+- **Context:** Fully interactive React-driven web portal that allows prospective clients to dynamically adjust their preferred hosting size, database types, support loops, API routes, and immediately see interactive quote pricing matched with simulated Statements of Work.
+
+### Specific Industries & Statements of Work
+Clarity Space supports multiple specialized industrial templates with fully formed Spec Blueprints:
+
+1. **Swim Academy & Active Leisure Scheduler SOW**
+   - **Path:** `https://clarityspace.com.au/swimming-school-quote`
+   - **Interactive Live Preview Sandbox:** `https://clarityspace.com.au/swimming-school-quote/demo`
+   - **Key Features:** Class rosters, trainer timeline planners, responsive scheduling widgets.
+
+2. **Corporate & Strategy Advisor Advisory Desk SOW**
+   - **Path:** `https://clarityspace.com.au/consultant-quote`
+   - **Interactive Live Preview Sandbox:** `https://clarityspace.com.au/consultant-quote/demo`
+   - **Key Features:** Swiss-Prussian highbrow typography, interactive ROI systems modeler, executive bio matrices.
+
+3. **Creative Studio Spatial Architecture Portfolio SOW**
+   - **Path:** `https://clarityspace.com.au/portfolio-quote`
+   - **Interactive Live Preview Sandbox:** `https://clarityspace.com.au/portfolio-quote/demo`
+   - **Key Features:** Brutalist concrete layouts, light-meter grids, high-fidelity responsive photo showcases.
+
+4. **Trades & Contractors Dispatch SLA SOW**
+   - **Path:** `https://clarityspace.com.au/trades-quote`
+   - **Interactive Live Preview Sandbox:** `https://clarityspace.com.au/trades-quote/demo`
+   - **Key Features:** Urgency categories, emergency priority fees, responsive callout price meters.
+
+5. **Fine Dining Atmospheric Harvest Bistro SOW**
+   - **Path:** `https://clarityspace.com.au/restaurant-quote`
+   - **Interactive Live Preview Sandbox:** `https://clarityspace.com.au/restaurant-quote/demo`
+   - **Key Features:** Organic botanical aesthetic, reservation booking, vintage reserve wine locker displays.
+
+6. **Luxury Boutique & Satin Thread Catalog SOW**
+   - **Path:** `https://clarityspace.com.au/local-quote`
+   - **Interactive Live Preview Sandbox:** `https://clarityspace.com.au/local-quote/demo`
+   - **Key Features:** Elegant, sleek shopping flow, real-time stock limits, interactive sliding bag counters.
+
+7. **Professional Business App & Web Spec SOW**
+   - **Path:** `https://clarityspace.com.au/static-business-quote`
+   - **Key Features:** Structured tabular price breakdowns, secure contact leads collection forms.
+
+---
+
+## 3. Engineering & Delivery Commitments (Rigorous 14-Day SLA)
+Every Clarity Space system is delivered with:
+- **Zero Lock-In Ownership:** Fully exported standard-compliant ZIP structures.
+- **Fast Speed Performance:** Static Jamstack or server-side hydration maintaining high speed index factors.
+- **W3C Standard Compliance:** Injected dynamic JSON-LD metadata and semantic outlines for search bots.
